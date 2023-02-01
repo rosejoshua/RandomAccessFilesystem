@@ -11,40 +11,36 @@ RafDb::RafDb()
   numSortedRecords = 0;
   numOverflow = 0;
   recordSize = 0;
+  p_dbFilePtr = new fstream();
 }
 
-RafDb::~RafDb() {}
-
-// void RafDb::setFieldsAndMaxLengths(vector< pair<string,int> > fieldsAndMaxLengths)
-// {
-//   this->fieldsAndMaxLengths = vector< pair<string,int> >(fieldsAndMaxLengths);
-// }
-
-// void RafDb::setNumSortedRecords(int numSortedRecords)
-// {
-//   this->numSortedRecords = numSortedRecords;
-// }
-
-// void RafDb::setNumOverflowRecords(int numOverflowRecords)
-// {
-//   this->numOverflow = numOverflowRecords;
-// }
-void RafDb::getDefaultFields(vector<string> &fields)
+RafDb::~RafDb()
 {
-  fields.clear();
-  for (int i=0; i<fieldsAndMaxLengths.size(); i++)
+  if (p_dbFilePtr != nullptr)
   {
-    fields.push_back(string(fieldsAndMaxLengths[i].first));
+    if (p_dbFilePtr->is_open())
+      p_dbFilePtr->close();
+    delete p_dbFilePtr;
   }
 }
 
-void RafDb::updateRecordSize()
+void RafDb::getDefaultFields(vector<string> *fields)
 {
-  for (int i=0; i<fieldsAndMaxLengths.size(); i++)
+  fields->clear();
+  for (int i = 0; i < fieldsAndMaxLengths.size(); i++)
   {
-      recordSize += fieldsAndMaxLengths[i].second;
+    fields->push_back(string(fieldsAndMaxLengths[i].first));
   }
-  recordSize +=1;
+}
+
+void RafDb::updateEntryWidth()
+{
+  recordSize = 0;
+  for (int i = 0; i < fieldsAndMaxLengths.size(); i++)
+  {
+    recordSize += fieldsAndMaxLengths[i].second;
+  }
+  recordSize += ON_MS_WINDOWS_OS ? 2 : 1;
 }
 
 bool RafDb::open(const string &filename)
@@ -53,32 +49,38 @@ bool RafDb::open(const string &filename)
   string tempString1;
   string tempString2;
 
-  dIn.open(filename+".config");
-  if(!dIn)
+  if (isOpen())
+  {
+    cerr << "Error: database already open. Please close before opening a new database." << endl;
+    return false;
+  }
+
+  dIn.open(filename + ".config");
+  if (!dIn)
   {
     cerr << "Error opening \'" << filename << ".config\'\n\tHint: does file exist?" << endl;
     return false;
   }
 
-  getline (dIn, tempString1, ',');  // try to read first field of config file
-  getline (dIn, tempString2);
+  getline(dIn, tempString1, ','); // try to read first field of config file
+  getline(dIn, tempString2);
   numSortedRecords = stoi(tempString1);
   numOverflow = stoi(tempString2);
 
-  getline (dIn, tempString1, ',');
-  while(!dIn.eof())
+  getline(dIn, tempString1, ',');
+  fieldsAndMaxLengths.clear();
+  while (!dIn.eof())
   {
-    getline (dIn, tempString2);  // try to read a name
-    fieldsAndMaxLengths.push_back(pair<string,int>(tempString1,stoi(tempString2)));
-
-    getline (dIn, tempString1, ',');
+    getline(dIn, tempString2); // try to read a name
+    fieldsAndMaxLengths.push_back(pair<string, int>(tempString1, stoi(tempString2)));
+    getline(dIn, tempString1, ',');
   }
   dIn.close();
 
-  //checking if file exists on ifstream before opening on read/write fstream following because fStream will
-  //create the file if it doesn't exist and we don't want that.
-  dIn.open(filename+".data");
-  if(!dIn)
+  // checking if file exists on ifstream before opening on read/write fstream following because fStream will
+  // create the file if it doesn't exist and we don't want that.
+  dIn.open(filename + ".data");
+  if (!dIn)
   {
     dIn.close();
     return false;
@@ -86,48 +88,232 @@ bool RafDb::open(const string &filename)
   dIn.close();
 
   // Open file in read/write mode
-  fStream.open(filename + ".data", fstream::in | fstream::out | fstream::app);
-  if(fStream.is_open())
+  p_dbFilePtr->open(filename + ".data", fstream::in | fstream::out | fstream::app);
+  if (p_dbFilePtr->is_open())
   {
-
-    updateRecordSize();
+    updateEntryWidth();
     return true;
   }
-  else return false;
+  else
+    return false;
 }
 
 bool RafDb::isOpen()
 {
-    return (fStream.is_open());
+  if (p_dbFilePtr == nullptr || (!p_dbFilePtr->is_open()))
+    return false;
+  else
+    return true;
 }
 
 void RafDb::close()
 {
-  if (fStream.is_open())
-    fStream.close();
+  if (p_dbFilePtr != nullptr && p_dbFilePtr->is_open())
+    p_dbFilePtr->close();
 }
 
-bool RafDb::searchByToken(const string &target, vector<string> &fields)
+void RafDb::spaceToUnderscore(string &text)
 {
+  std::replace(text.begin(), text.end(), ' ', '_');
+}
+
+void RafDb::underscoreToSpace(string &text)
+{
+  std::replace(text.begin(), text.end(), '_', ' ');
+}
+
+void RafDb::printRecord(vector<string> *results)
+{
+  string tempString = "";
+  cout << "|";
+  for (int i = 0; i < results->size(); i++)
+  {
+    tempString = results->at(i);
+    underscoreToSpace(tempString);
+    cout << setw(getMinWidthField(i)) << left << tempString;
+    cout << "|";
+  }
+  cout << endl;
+}
+
+int RafDb::getMinWidthField(const int index)
+{
+  if (!isOpen())
+  {
+    cerr << "No database open!" << endl;
+    return 0;
+  }
+  int returnInt = fieldsAndMaxLengths[index].first.length() > fieldsAndMaxLengths[index].second ? fieldsAndMaxLengths[index].first.length() : fieldsAndMaxLengths[index].second;
+
+  return returnInt;
+}
+
+void RafDb::printHeader()
+{
+  if (!isOpen())
+  {
+    cerr << "No database open!" << endl;
+    return;
+  }
+
+  cout << "-";
+  for (int i = 0; i < fieldsAndMaxLengths.size(); i++)
+  {
+    for (int j = 0; j < getMinWidthField(i); j++)
+    {
+      cout << "-";
+    }
+    cout << "-";
+  }
+  cout << endl;
+
+  cout << "|";
+  for (int i = 0; i < fieldsAndMaxLengths.size(); i++)
+  {
+    cout << setw(getMinWidthField(i)) << left << fieldsAndMaxLengths[i].first;
+    cout << "|";
+  }
+  cout << endl;
+
+  cout << "-";
+  for (int i = 0; i < fieldsAndMaxLengths.size(); i++)
+  {
+    for (int j = 0; j < getMinWidthField(i); j++)
+    {
+      cout << "-";
+    }
+    cout << "-";
+  }
+  cout << endl;
+}
+
+void RafDb::printFooter()
+{
+  cout << "-";
+  for (int i = 0; i < fieldsAndMaxLengths.size(); i++)
+  {
+    for (int j = 0; j < getMinWidthField(i); j++)
+    {
+      cout << "-";
+    }
+    cout << "-";
+  }
+  cout << endl;
+}
+
+bool RafDb::createDB(const string inFilename)
+{
+  ifstream dIn;  // the csv file
+  ofstream dOut; // the data file
+  string tempString1;
+  string tempString2;
+  int numInputSortedRecords = 0;
+  int numInputOverflow = 0;
+
+  dIn.open(inFilename + ".config");
+  if (!dIn)
+  {
+    cerr << "Error opening \'" << inFilename << ".config\'\n\tHint: does file exist?" << endl;
+    return false;
+  }
+
+  getline(dIn, tempString1, ','); // try to read first field of config file
+  getline(dIn, tempString2);
+  numInputSortedRecords = stoi(tempString1);
+  numInputOverflow = stoi(tempString2);
+
+  fieldsAndMaxLengths.clear();
+
+  getline(dIn, tempString1, ',');
+  while (!dIn.eof())
+  {
+    getline(dIn, tempString2); // try to read a name
+    fieldsAndMaxLengths.push_back(pair<string, int>(tempString1, stoi(tempString2)));
+
+    getline(dIn, tempString1, ',');
+  }
+  dIn.close();
+  updateEntryWidth();
+
+  dIn.open(inFilename + ".csv");
+  if (!dIn)
+  {
+    cerr << "Error opening \'" << inFilename << ".csv\'\n\tHint: does file exist?" << endl;
+    return false;
+  }
+  dOut.open(inFilename + ".data");
+  // finished with temporary ofStream object
+  dOut.close();
+
+  if (p_dbFilePtr != nullptr && p_dbFilePtr->is_open())
+    p_dbFilePtr->close();
+
+  p_dbFilePtr->open(inFilename + ".data", fstream::in | fstream::out | fstream::app);
+  if (!p_dbFilePtr->is_open())
+    return false;
+
+  vector<string> entry;
+
+  getline(dIn, tempString1, ',');
+  while (!dIn.eof() && (numOverflow + numSortedRecords) < (numInputOverflow + numInputSortedRecords))
+  {
+    for (int i = 0; i < fieldsAndMaxLengths.size() - 1; i++)
+    {
+      if (i != 0)
+        getline(dIn, tempString1, ',');
+      spaceToUnderscore(tempString1);
+      entry.push_back(tempString1);
+    }
+    getline(dIn, tempString1);
+    spaceToUnderscore(tempString1);
+    entry.push_back(tempString1);
+    writeRecord(&entry);
+    if (numSortedRecords < numInputSortedRecords)
+      numSortedRecords++;
+    else if (numOverflow < numInputOverflow)
+      numOverflow++;
+    entry.clear();
+    getline(dIn, tempString1, ',');
+  }
+  cout << "Successfully created " << inFilename << ".data from " << inFilename << ".csv" << endl;
+  dIn.close();
+  close();
+  return true;
+}
+
+bool RafDb::searchByToken(string &target, vector<string> *fields)
+{
+  spaceToUnderscore(target);
   int index = binarySearch(target, fields);
+  if (index != -1)
+  {
+    printHeader();
+    printRecord(fields);
+    printFooter();
+    cout << endl;
+  }
   return (index != -1);
-  return false;
 }
 
-bool RafDb::readRecord(const int recordNum, vector<string> &fields)
+bool RafDb::readRecord(const int recordNum, vector<string> *fields)
 {
+  if (!isOpen())
+  {
+    cerr << "Error: trying to read record without an opened database!" << endl;
+    return false;
+  }
   bool status = false;
-
+  string str = "";
   if ((0 <= recordNum) && (recordNum < numSortedRecords + numOverflow))
   {
-    fStream.seekg(recordNum * recordSize, ios::beg);
-    for(int i=0; i<fields.size(); i++)
+    p_dbFilePtr->seekg(recordNum * recordSize, ios::beg);
+    for (int i = 0; i < fields->size(); i++)
     {
-      fStream.width(fieldsAndMaxLengths[i].second);
-      fStream >> fields[i];
+      p_dbFilePtr->width(fieldsAndMaxLengths[i].second);
+      *p_dbFilePtr >> str;
+      fields->at(i) = str;
+      str = "";
     }
-      
-    //fStream >> name >> rank >> city >> state >> zip >> employees;
     status = true;
   }
   else
@@ -136,40 +322,42 @@ bool RafDb::readRecord(const int recordNum, vector<string> &fields)
   return status;
 }
 
-bool RafDb::writeRecord(const string &name, const string &rank, const string &city, const string &state, const string &zip, const string &employees)
+bool RafDb::writeRecord(vector<string> *fields)
 {
-  if (fStream.is_open())
+  if (!isOpen())
   {
-    // fStream << setw(10) << left << name 
-    //      << setw(5) << left << rank 
-    //      << setw(5) << left << city 
-    //      << setw(20) << left << state 
-    //      << setw(30) << left << zip 
-    //      << setw(30) << left << employees
-    //      << endl;
-
+    cerr << "Error: Attempting file write without an opened file!" << endl;
+    return false;
+  }
+  else
+  {
+    string tempString;
+    for (int i = 0; i < fields->size(); i++)
+    {
+      tempString = fields->at(i);
+      spaceToUnderscore(tempString);
+      *p_dbFilePtr << setw(fieldsAndMaxLengths[i].second) << left << tempString;
+    }
+    *p_dbFilePtr << endl;
     return true;
   }
-  else return false;
 }
 
-int RafDb::binarySearch(const string &targetName, vector<string> &fields)
+int RafDb::binarySearch(const string &targetName, vector<string> *fields)
 {
   int low = 0;
-  int high = NUM_RECORDS - 1;
+  int high = numSortedRecords - 1;
   int mid;
   bool failure = false;
-
   bool found = false;
   while (!found && (high >= low) && !failure)
   {
     mid = (low + high) / 2;
-    //cout << "mid: " << mid << " , midId: " << midId << ":" << endl;
     if (readRecord(mid, fields))
     {
-      if (fields[0].compare(targetName) == 0)
+      if (fields->at(0).compare(targetName) == 0)
         found = true;
-      else if (fields[0].compare(targetName) < 0)
+      else if ((fields->at(0)).compare(targetName) < 0)
         low = mid + 1;
       else
         high = mid - 1;
@@ -185,4 +373,41 @@ int RafDb::binarySearch(const string &targetName, vector<string> &fields)
     return mid; // the record number of the record
   else
     return -1;
+}
+
+void RafDb::runTests()
+{
+  createDB("Fortune500");
+  open("Fortune500");
+  vector<string> fields;
+  getDefaultFields(&fields);
+  if (readRecord(0, &fields))
+  {
+    printHeader();
+    printRecord(&fields);
+  }
+
+  if (readRecord(9, &fields))
+  {
+    printRecord(&fields);
+  }
+  if (readRecord(5, &fields))
+  {
+    printRecord(&fields);
+  }
+  printFooter();
+  if (readRecord(-1, &fields))
+  {
+    printHeader();
+    printRecord(&fields);
+    printFooter();
+  }
+  if (readRecord(1000, &fields))
+  {
+    printHeader();
+    printRecord(&fields);
+    printFooter();
+  }
+
+  close();
 }

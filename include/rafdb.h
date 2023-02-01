@@ -13,39 +13,36 @@ using namespace std;
 class RafDb
 {
 private:
-  fstream fStream;
   int numSortedRecords;
   int numOverflow;
   int recordSize;
+  fstream *p_dbFilePtr;
   vector< pair<string,int> > fieldsAndMaxLengths;
 
-  void updateRecordSize();
-  bool readRecord(const int recordNum, vector<string> &fields);
-  bool writeRecord(const string &name, const string &rank, const string &city, const string &state, const string &zip, const string &employees);
-  int binarySearch(const string &targetName, vector<string> &fields);
+  void spaceToUnderscore(string &text);
+  void underscoreToSpace(string &text);
+  void updateEntryWidth();
+  void printHeader();
+  void printFooter();
+  int getMinWidthField(const int index);
+  bool readRecord(const int recordNum, vector<string> *fields);
+  void printRecord(vector<string> *results);
+  bool writeRecord(vector<string> *fields);
+  int binarySearch(const string &targetName, vector<string> *fields);
 
 public:
   const static bool ON_MS_WINDOWS_OS = false;
 
-  const static int NAME_SIZE = 38;
-  const static int RANK_SIZE = 3;
-  const static int CITY_SIZE = 19;
-  const static int STATE_SIZE = 2;
-  const static int ZIP_SIZE = 5;
-  const static int EMPLOYEES_SIZE = 7;
-
-  const static int RECORD_SIZE = NAME_SIZE + RANK_SIZE + CITY_SIZE + STATE_SIZE + ZIP_SIZE + EMPLOYEES_SIZE + (ON_MS_WINDOWS_OS? 2:1);
-  const static int NUM_RECORDS = 500;
-
   RafDb();
   ~RafDb();
 
-  //void setFieldsAndMaxLengths(vector< pair<string,int> > fieldsAndMaxLengths);
-  bool searchByToken(const string &target, vector<string> &fields);
-  void getDefaultFields(vector<string> &fields);
-  void setNumSortedRecords(int numSortedRecords);
-  void setNumOverflowRecords(int numOverflowRecords);
+  bool createDB(const string inFilename);
+  bool searchByToken(string &target, vector<string> *fields);
+  void getDefaultFields(vector<string> *fields);
+  // void setNumSortedRecords(int numSortedRecords);
+  // void setNumOverflowRecords(int numOverflowRecords);
   bool open(const string &filename);
   bool isOpen();
   void close();
+  void runTests();
 };
