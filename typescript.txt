@@ -1,0 +1,23 @@
+Script started on Tue Jan 31 23:02:08 2023
+[1m[7m%[27m[1m[0m                                                                                                                                                                                              ]633;D]633;P;Cwd=/Users/admin/csce4523/hw1[0m[27m[24m[J]633;Aadmin@unknown063192898b3e hw1 % ]633;B[K[?2004hmmake clean[?2004l
+]633;C]633;E;make cleanrm -rf bin/program objs/*.o
+[1m[7m%[27m[1m[0m                                                                                                                                                                                              ]633;D;0]633;P;Cwd=/Users/admin/csce4523/hw1[0m[27m[24m[J]633;Aadmin@unknown063192898b3e hw1 % ]633;B[K[?2004hmmake[?2004l
+]633;C]633;E;makeg++ -I include/ -c src/rafdb.cpp -o objs/rafdb.o
+g++ -I include/ -c src/myclass.cpp -o objs/myclass.o
+g++ -I include/ -c src/main.cpp -o objs/main.o
+g++ objs/*.o -o bin/program
+[1m[7m%[27m[1m[0m                                                                                                                                                                                              ]633;D;0]633;P;Cwd=/Users/admin/csce4523/hw1[0m[27m[24m[J]633;Aadmin@unknown063192898b3e hw1 % ]633;B[K[?2004h../bin/program[1m [0m[0m [?2004l
+]633;C]633;E;./bin/programSuccessfully created Fortune500.data from Fortune500.csv
+---------------------------------------------------------------------------------------
+|NAME                                  |RANK|CITY               |STATE|ZIP  |EMPLOYEES|
+---------------------------------------------------------------------------------------
+|3M                                    |94  |MAPLEWOOD          |MN   |55144|91584    |
+|AECOM                                 |161 |LOS ANGELES        |CA   |90067|87000    |
+|ACTIVISION BLIZZARD                   |406 |SANTA MONICA       |CA   |90405|9500     |
+---------------------------------------------------------------------------------------
+Record -1 out of range.
+Record 1000 out of range.
+exiting...
+[1m[7m%[27m[1m[0m                                                                                                                                                                                              ]633;D;0]633;P;Cwd=/Users/admin/csce4523/hw1[0m[27m[24m[J]633;Aadmin@unknown063192898b3e hw1 % ]633;B[K[?2004heexit[?2004l
+]633;C]633;E;exit
+Script done on Tue Jan 31 23:02:45 2023

@@ -78,7 +78,7 @@ bool RafDb::open(const string &filename)
   dIn.close();
 
   // checking if file exists on ifstream before opening on read/write fstream following because fStream will
-  // create the file if it doesn't exist and we don't want that.
+  // create the file if it doesn't exist.
   dIn.open(filename + ".data");
   if (!dIn)
   {
@@ -88,7 +88,8 @@ bool RafDb::open(const string &filename)
   dIn.close();
 
   // Open file in read/write mode
-  p_dbFilePtr->open(filename + ".data", fstream::in | fstream::out | fstream::app);
+  p_dbFilePtr->open(filename + ".data", std::ios_base::in | std::ios_base::out | std::ios_base::ate);
+  //p_dbFilePtr->open(filename + ".data", fstream::in | fstream::out | fstream::app);
   if (p_dbFilePtr->is_open())
   {
     updateEntryWidth();
@@ -295,6 +296,31 @@ bool RafDb::searchByToken(string &target, vector<string> *fields)
   return (index != -1);
 }
 
+bool RafDb::updateRecord(vector<string> *fields)
+{
+  if (isOpen())
+  {
+    vector<string> tempFields;
+    tempFields = *fields;
+    string searchToken = tempFields[0];
+    spaceToUnderscore(searchToken);
+    int index = binarySearch(searchToken, &tempFields);
+    if (index != -1 && fields->at(1).compare("-1")!=0)
+    {
+      p_dbFilePtr->seekp(index * recordSize);
+      bool success = writeRecord(fields);
+      if (success)
+      {
+        underscoreToSpace(searchToken);
+        cout << "Success updating entry with key: " << searchToken << endl;
+      }
+      
+      return success;
+    }
+  }
+  return false;
+}
+
 bool RafDb::readRecord(const int recordNum, vector<string> *fields)
 {
   if (!isOpen())
@@ -324,6 +350,7 @@ bool RafDb::readRecord(const int recordNum, vector<string> *fields)
 
 bool RafDb::writeRecord(vector<string> *fields)
 {
+  
   if (!isOpen())
   {
     cerr << "Error: Attempting file write without an opened file!" << endl;
@@ -334,7 +361,7 @@ bool RafDb::writeRecord(vector<string> *fields)
     string tempString;
     for (int i = 0; i < fields->size(); i++)
     {
-      tempString = fields->at(i);
+      tempString = fields->at(i).substr(0,fieldsAndMaxLengths[i].second);
       spaceToUnderscore(tempString);
       *p_dbFilePtr << setw(fieldsAndMaxLengths[i].second) << left << tempString;
     }
@@ -377,7 +404,7 @@ int RafDb::binarySearch(const string &targetName, vector<string> *fields)
 
 void RafDb::runTests()
 {
-  createDB("Fortune500");
+  //createDB("Fortune500");
   open("Fortune500");
   vector<string> fields;
   getDefaultFields(&fields);
@@ -408,6 +435,31 @@ void RafDb::runTests()
     printRecord(&fields);
     printFooter();
   }
+
+  if (readRecord(9, &fields))
+  {
+    printRecord(&fields);
+  }
+  fields[1] = "999";
+  updateRecord(&fields);
+  if (readRecord(9, &fields))
+  {
+    printRecord(&fields);
+  }
+
+  if (readRecord(499, &fields))
+  {
+    printRecord(&fields);
+  }
+  fields[2] = "fjkdlajkdjfs jkldsjadkf  djklajfklsjkljfdklsa jkfdlsjaflkdsj";
+  updateRecord(&fields);
+  if (readRecord(499, &fields))
+  {
+    printRecord(&fields);
+  }
+
+  fields[0] = "ACME INC";
+  updateRecord(&fields);
 
   close();
 }

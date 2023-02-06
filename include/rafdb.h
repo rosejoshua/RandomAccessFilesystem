@@ -39,8 +39,7 @@ public:
   bool createDB(const string inFilename);
   bool searchByToken(string &target, vector<string> *fields);
   void getDefaultFields(vector<string> *fields);
-  // void setNumSortedRecords(int numSortedRecords);
-  // void setNumOverflowRecords(int numOverflowRecords);
+  bool updateRecord(vector<string> *fields);
   bool open(const string &filename);
   bool isOpen();
   void close();

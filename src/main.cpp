@@ -50,15 +50,7 @@ void menuOpt4(RafDb &db, vector<string> *fields)
 
 int main(){
    RafDb db;
-   // menuOpt1(db);
-   // menuOpt2(db);
-   // vector<string> fields;
-   // vector<string> *p_fields = &fields;
-   // db.getDefaultFields(p_fields);
    db.runTests();
-   // menuOpt4(db, p_fields);
-   // menuOpt4(db, p_fields);
-   // menuOpt3(db, p_fields);
 
 	cout << "exiting..." << endl;
 	return 0;
