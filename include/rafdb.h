@@ -25,6 +25,7 @@ private:
   void printHeader();
   void printFooter();
   int getMinWidthField(const int index);
+  bool findRecord(int *recordNum, vector<string> *fields);
   bool readRecord(const int recordNum, vector<string> *fields);
   void printRecord(vector<string> *results);
   bool writeRecord(vector<string> *fields);
@@ -40,6 +41,7 @@ public:
   bool searchByToken(string &target, vector<string> *fields);
   void getDefaultFields(vector<string> *fields);
   bool updateRecord(vector<string> *fields);
+  bool deleteRecord(const string &name);
   bool open(const string &filename);
   bool isOpen();
   void close();

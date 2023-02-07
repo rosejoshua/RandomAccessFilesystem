@@ -481,7 +481,7 @@ WELLS_FARGO                           25 SAN_FRANCISCO      CA94163269100
 WESCO_INTERNATIONAL                   373PITTSBURGH         PA152199000   
 WESTERN_&_SOUTHERN_FINANCIAL_GROUP    483CINCINNATI         OH452022178   
 WESTERN_DIGITAL                       217IRVINE             CA9261272878  
-WESTERN_REFINING                      349EL_PASO            TX799017134   
+WESTERN_REFINING                      -1 -1                 -1-1   -1     
 WESTERN_UNION                         478ENGLEWOOD          CO8011210700  
 WESTROCK                              190NORCROSS           GA3007139000  
 WEYERHAEUSER                          341SEATTLE            WA9810410400  
@@ -497,4 +497,4 @@ XPO_LOGISTICS                         191GREENWICH          CT6831 87000
 YAHOO                                 498SUNNYVALE          CA940898500   
 YUM_BRANDS                            422LOUISVILLE         KY4021390000  
 YUM_CHINA_HOLDINGS                    399PLANO              TX75024420000 
-ZIMMER_BIOMET_HOLDINGS                -1 fjkdlajkdjfs_jkldsjIN4658018500  
+ZIMMER_BIOMET_HOLDINGS                352fjkdlajkdjfs_jkldsjIN4658018500  

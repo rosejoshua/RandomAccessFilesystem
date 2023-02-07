@@ -286,7 +286,7 @@ bool RafDb::searchByToken(string &target, vector<string> *fields)
 {
   spaceToUnderscore(target);
   int index = binarySearch(target, fields);
-  if (index != -1)
+  if (index != -1 && fields->at(1).compare("-1") != 0)
   {
     printHeader();
     printRecord(fields);
@@ -302,22 +302,63 @@ bool RafDb::updateRecord(vector<string> *fields)
   {
     vector<string> tempFields;
     tempFields = *fields;
-    string searchToken = tempFields[0];
-    spaceToUnderscore(searchToken);
-    int index = binarySearch(searchToken, &tempFields);
-    if (index != -1 && fields->at(1).compare("-1")!=0)
+    int index = -1;
+    if (findRecord(&index, &tempFields))
     {
-      p_dbFilePtr->seekp(index * recordSize);
-      bool success = writeRecord(fields);
-      if (success)
+      if (index != -1)
       {
-        underscoreToSpace(searchToken);
-        cout << "Success updating entry with key: " << searchToken << endl;
+        p_dbFilePtr->seekp(index * recordSize);
+        bool success = writeRecord(fields);
+        if (success)
+        {
+          string target = tempFields[0];
+          underscoreToSpace(target);
+          cout << "Success updating entry with key: " << target << endl;
+        }
+        return success; //record found and updated
       }
-      
-      return success;
     }
+    return false; //record not found
   }
+  return false; //database not open
+}
+
+bool RafDb::deleteRecord(const string &name)
+{
+  bool deleted = false;
+  int index = -1;
+  vector<string> tempFields;
+  getDefaultFields(&tempFields);
+  tempFields[0] = name;
+  findRecord(&index, &tempFields);
+  if (index != -1)
+  {
+    for(int i = 1; i<tempFields.size(); i++)
+    {
+      tempFields[i] = "-1";
+    }
+    cout << "success deleting" << endl; //delete this
+    printRecord(&tempFields); // delete this
+    p_dbFilePtr->seekp(index * recordSize);
+    deleted = writeRecord(&tempFields);
+  }
+  return deleted;
+}
+
+bool RafDb::findRecord(int *recordNum, vector<string> *fields)
+{
+  if (isOpen())
+  {
+    string target = fields->at(0);
+    spaceToUnderscore(target);
+    *recordNum = binarySearch(target, fields);
+    if (*recordNum == -1)
+    {
+      getDefaultFields(fields);
+    }
+    return true;
+  }
+  cerr << "Error: trying to find record without an opened database!" << endl;
   return false;
 }
 
@@ -404,7 +445,7 @@ int RafDb::binarySearch(const string &targetName, vector<string> *fields)
 
 void RafDb::runTests()
 {
-  //createDB("Fortune500");
+  createDB("Fortune500");
   open("Fortune500");
   vector<string> fields;
   getDefaultFields(&fields);
@@ -457,9 +498,11 @@ void RafDb::runTests()
   {
     printRecord(&fields);
   }
+  string s = "WESTERN_REFINING";
+  searchByToken(s, &fields);
 
-  fields[0] = "ACME INC";
-  updateRecord(&fields);
+  deleteRecord(s);
+  searchByToken(s, &fields);
 
   close();
 }
