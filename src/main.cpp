@@ -138,7 +138,9 @@ void menuOpt5(RafDb *db, vector<string> *fields)
 
 void menuOpt6(RafDb *db)
 {
+   int numRecords = 10;
    cout << endl;
+   cout << "CREATE REPORT FIRST " << numRecords << " RECORDS" << endl;
    db->printFirstNumRecords(10);
 }
 
@@ -224,7 +226,6 @@ void resolveMenuMethod(int choice, RafDb* p_db, vector<string>* p_fields)
       cout << "chose 7" << endl;
       break;
    case 8:
-      cout << "chose 8" << endl;
       //call method
       if (p_db->isOpen())
       {
