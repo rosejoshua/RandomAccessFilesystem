@@ -38,10 +38,11 @@ public:
   void printIndexHeader();
   void printFooter();
   void printRecord(vector<string> *results);
-  void printRecordRange(const int low, const int high);
+  void printFirstNumRecords(int numRecords);
   bool createDB(const string inFilename);
   bool searchByToken(string &target, vector<string> *fields);
   void getDefaultFields(vector<string> *fields);
+  string getColumnName(int columnIndex);
   bool updateRecord(vector<string> *fields);
   bool deleteRecord(const string &name);
   bool open(const string &filename);

@@ -33,6 +33,11 @@ void RafDb::getDefaultFields(vector<string> *fields)
   }
 }
 
+string RafDb::getColumnName(int columnIndex)
+{
+  return fieldsAndMaxLengths.at(columnIndex).first;
+}
+
 void RafDb::updateEntryWidth()
 {
   recordSize = 0;
@@ -138,22 +143,21 @@ void RafDb::printRecord(vector<string> *results)
 }
 
 
-void RafDb::printRecordRange(const int low, const int high)
+void RafDb::printFirstNumRecords(int numRecords)
 {
   vector<string> fields;
   getDefaultFields(&fields);
-  if (high >= low)
+  printHeader();
+  for (int i = 0; numRecords > 0; i++)
   {
-    printHeader();
-    for (int i = low; i < high+1; i++)
+    readRecord(i, &fields);
+    if (!(fields[1] == "-1"))
     {
-      readRecord(i, &fields);
       printRecord(&fields);
+      numRecords--;
     }
-    printFooter();
   }
-
-  
+  printFooter();
 }
 
 int RafDb::getMinWidthField(const int index)
@@ -391,8 +395,6 @@ bool RafDb::deleteRecord(const string &name)
     {
       tempFields[i] = "-1";
     }
-    cout << "success deleting" << endl; //delete this
-    printRecord(&tempFields); // delete this
     p_dbFilePtr->seekp(index * recordSize);
     deleted = writeRecord(&tempFields);
   }

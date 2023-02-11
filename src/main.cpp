@@ -2,6 +2,8 @@
 #include <rafdb.h>
 #include <vector>
 
+using namespace std;
+
 void menuOpt1(RafDb *db)
 {
    string inputCsvName;
@@ -9,6 +11,8 @@ void menuOpt1(RafDb *db)
    cout << "Please enter the input .csv name without file extension: ";
    getline(cin, inputCsvName, '\n');
    cin.clear();
+   cout << endl;
+   cout << "CREATE DATABASE \"" << inputCsvName << "\"" << endl;
    db->createDB(inputCsvName);
 }
 
@@ -18,6 +22,8 @@ void menuOpt2(RafDb *db)
    cout << "Please enter the name of a database to open: ";
    getline(cin, dbName, '\n');
    cin.clear();
+   cout << endl;
+   cout << "OPEN DATABASE \"" << dbName << "\"" << endl;
 
    if (db->open(dbName))
    {
@@ -31,6 +37,7 @@ void menuOpt2(RafDb *db)
 
 void menuOpt3(RafDb *db, vector<string> *fields)
 {
+   cout << "CLOSE OPEN DATABASE ANY" << endl;
    cout << "Closing any open database files." << endl;
    fields->clear();
    db->close();
@@ -42,9 +49,9 @@ void menuOpt4(RafDb *db, vector<string> *fields)
    cout << "Please enter the name to search (case-sensitive): ";
    getline(cin, searchTarget, '\n');
    cin.clear();
+   cout << endl;
+   cout << "DISPLAY COMPLETE RECORD \"" << searchTarget << "\"" << endl;
 
-   cout << "input: " << searchTarget << endl;
-   
    db->getDefaultFields(fields);
 
    if (!db->searchByToken(searchTarget, fields) || fields->at(1).compare("-1") == 0)
@@ -64,13 +71,15 @@ void menuOpt5(RafDb *db, vector<string> *fields)
    cout << "Please enter the name of record to edit (case-sensitive): ";
    getline(cin, searchTarget, '\n');
    cin.clear();
+   cout << endl;
 
-   cout << "input: " << searchTarget << endl;
-   
    db->getDefaultFields(fields);
 
    if (!db->searchByToken(searchTarget, fields) || fields->at(1).compare("-1") == 0)
+   {
+      cout << "UPDATE \"" << searchTarget << "\" RECORD" << endl;
       cout << "No results found." << endl;
+   }
    else
    {
       db->printIndexHeader();
@@ -80,6 +89,7 @@ void menuOpt5(RafDb *db, vector<string> *fields)
       cout << "Index of element to edit (cannot edit index 0, key): ";
       getline(cin, searchTarget);
       cin.clear();
+      cout << endl;
       try 
       {
          index = stoi(searchTarget);
@@ -88,31 +98,36 @@ void menuOpt5(RafDb *db, vector<string> *fields)
       catch (const std::exception& e) 
       {
          index = 0;
-         cerr << "Invalid input!" << endl;
+         cout << "UPDATE \"" << searchTarget << "\" RECORD" << endl;
+         cerr << "Invalid index input!" << endl;
          return;
       }
       if (index == 0)
       {
+         cout << "UPDATE \"" << searchTarget << "\" RECORD" << endl;
          cerr << "Error: cannot edit index 0, key!" << endl;
          return;
       }
       else if (index < 0 || index > fields->size()-1)
       {
          index = 0;
-         cerr << "Error: input out of range!" << endl;
+         cout << "UPDATE \"" << searchTarget << "\" RECORD" << endl;
+         cerr << "Error: input index out of range!" << endl;
          return;
       }
 
       cout << "Enter new value for element: ";
       getline(cin, searchTarget);
       cin.clear();
+      cout << endl;
 
       if (searchTarget == "")
       {
+         cout << "UPDATE \"" << fields->at(0) << "\" RECORD " << db->getColumnName(index) << " FROM " << fields->at(index) << " TO " << "\"\"" << endl;
          cerr << "Invalid empty input, try a space character if you want an empty field" << endl;
          return;
       }
-      
+      cout << "UPDATE \"" << fields->at(0) << "\" RECORD " << db->getColumnName(index) << " FROM \"" << fields->at(index) << "\" TO \"" << searchTarget << "\"" << endl;
       fields->at(index) = searchTarget;
       if (!db->updateRecord(fields))
       {
@@ -123,7 +138,22 @@ void menuOpt5(RafDb *db, vector<string> *fields)
 
 void menuOpt6(RafDb *db)
 {
-   db->printRecordRange(0,9);
+   cout << endl;
+   db->printFirstNumRecords(10);
+}
+
+void menuOpt8(RafDb *db)
+{
+   string deleteTarget="";
+   cout << "Please enter the name of record to delete (case-sensitive): ";
+   getline(cin, deleteTarget, '\n');
+   cin.clear();
+   cout << endl;
+
+   if (db->deleteRecord(deleteTarget))
+      cout << "Success deleting record: " << deleteTarget << endl;
+   else
+      cout << "Failure deleting record: " << deleteTarget << endl;
 }
 
 void printMenu()
@@ -145,28 +175,25 @@ void printMenu()
 
 void resolveMenuMethod(int choice, RafDb* p_db, vector<string>* p_fields)
 {
+   cout << endl;
    switch (choice)
    {
    case 0:
       printMenu();
       break;
    case 1:
-      cout << "chose 1" << endl;
       //call method
       menuOpt1(p_db);
       break;
    case 2:
-      cout << "chose 2" << endl;
       //call method
       menuOpt2(p_db);
       break;
    case 3:
-      cout << "chose 3" << endl;
       //call method
       menuOpt3(p_db, p_fields);
       break;
    case 4:
-      cout << "chose 4" << endl;
       //call method
       if (p_db->isOpen())
       {
@@ -176,7 +203,6 @@ void resolveMenuMethod(int choice, RafDb* p_db, vector<string>* p_fields)
          cerr << "No database is open yet!" << endl;
       break;
    case 5:
-      cout << "chose 5" << endl;
       //call method
       if (p_db->isOpen())
       {
@@ -186,11 +212,23 @@ void resolveMenuMethod(int choice, RafDb* p_db, vector<string>* p_fields)
          cerr << "No database is open yet!" << endl;
       break;
    case 6:
-      cout << "chose 6" << endl;
       //call method
       if (p_db->isOpen())
       {
       menuOpt6(p_db);
+      }
+      else 
+         cerr << "No database is open yet!" << endl;
+      break;
+   case 7:
+      cout << "chose 7" << endl;
+      break;
+   case 8:
+      cout << "chose 8" << endl;
+      //call method
+      if (p_db->isOpen())
+      {
+      menuOpt8(p_db);
       }
       else 
          cerr << "No database is open yet!" << endl;

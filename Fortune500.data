@@ -4,11 +4,11 @@ ABBOTT_LABORATORIES                   135SANTA_MONICA       CA9040175000
 ABBVIE                                111NORTH_CHICAGO      IL6006430000  
 ABM_INDUSTRIES                        500NEW_YORK           NY10176110000 
 ACTIVISION_BLIZZARD                   406SANTA_MONICA       CA904059500   
-ADOBE_SYSTEMS                         443MCLEAN             VA2210215706  
+ADOBE_SYSTEMS                         -1 -1                 -1-1   -1     
 ADP                                   240ROSELAND           NJ7068 57000  
-ADVANCE_AUTO_PARTS                    292CityTown           VA2401257500  
+ADVANCE_AUTO_PARTS                    292ROANOKE            VA2401257500  
 AECOM                                 161LOS_ANGELES        CA9006787000  
-AES                                   194ARLINGTON          VA2220319000  
+AES                                   194NewCity            VA2220319000  
 AETNA                                 43 HARTFORD           CT6156 49500  
 AFLAC                                 126COLUMBUS           GA3199910212  
 AGCO                                  370DULUTH             GA3009619795  
@@ -473,7 +473,7 @@ VOYA_FINANCIAL                        266NEW_YORK           NY101696700
 W.R._BERKLEY                          354GREENWICH          CT6830 7608   
 W.W._GRAINGER                         282LAKE_FOREST        IL6004525000  
 WALGREENS_BOOTS_ALLIANCE              17 DEERFIELD          IL60015300000 
-WALMART                               _  BENTONVILLE        AR727162300000
+WALMART                               1  FAYETOWN           AR727162300000
 WASTE_MANAGEMENT                      201HOUSTON            TX7700241200  
 WEC_ENERGY_GROUP                      368MILWAUKEE          WI532038074   
 WELLCARE_HEALTH_PLANS                 195TAMPA              FL336347400   
