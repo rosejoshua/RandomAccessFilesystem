@@ -137,6 +137,25 @@ void RafDb::printRecord(vector<string> *results)
   cout << endl;
 }
 
+
+void RafDb::printRecordRange(const int low, const int high)
+{
+  vector<string> fields;
+  getDefaultFields(&fields);
+  if (high >= low)
+  {
+    printHeader();
+    for (int i = low; i < high+1; i++)
+    {
+      readRecord(i, &fields);
+      printRecord(&fields);
+    }
+    printFooter();
+  }
+
+  
+}
+
 int RafDb::getMinWidthField(const int index)
 {
   if (!isOpen())
@@ -172,6 +191,45 @@ void RafDb::printHeader()
   for (int i = 0; i < fieldsAndMaxLengths.size(); i++)
   {
     cout << setw(getMinWidthField(i)) << left << fieldsAndMaxLengths[i].first;
+    cout << "|";
+  }
+  cout << endl;
+
+  cout << "-";
+  for (int i = 0; i < fieldsAndMaxLengths.size(); i++)
+  {
+    for (int j = 0; j < getMinWidthField(i); j++)
+    {
+      cout << "-";
+    }
+    cout << "-";
+  }
+  cout << endl;
+}
+
+void RafDb::printIndexHeader()
+{
+  if (!isOpen())
+  {
+    cerr << "No database open!" << endl;
+    return;
+  }
+
+  cout << "-";
+  for (int i = 0; i < fieldsAndMaxLengths.size(); i++)
+  {
+    for (int j = 0; j < getMinWidthField(i); j++)
+    {
+      cout << "-";
+    }
+    cout << "-";
+  }
+  cout << endl;
+
+  cout << "|";
+  for (int i = 0; i < fieldsAndMaxLengths.size(); i++)
+  {
+    cout << setw(getMinWidthField(i)) << left << i;
     cout << "|";
   }
   cout << endl;
@@ -242,6 +300,8 @@ bool RafDb::createDB(const string inFilename)
     cerr << "Error opening \'" << inFilename << ".csv\'\n\tHint: does file exist?" << endl;
     return false;
   }
+
+  //empty out file if it already exists.
   dOut.open(inFilename + ".data");
   // finished with temporary ofStream object
   dOut.close();
@@ -278,6 +338,7 @@ bool RafDb::createDB(const string inFilename)
   }
   cout << "Successfully created " << inFilename << ".data from " << inFilename << ".csv" << endl;
   dIn.close();
+  
   close();
   return true;
 }
@@ -286,13 +347,6 @@ bool RafDb::searchByToken(string &target, vector<string> *fields)
 {
   spaceToUnderscore(target);
   int index = binarySearch(target, fields);
-  if (index != -1 && fields->at(1).compare("-1") != 0)
-  {
-    printHeader();
-    printRecord(fields);
-    printFooter();
-    cout << endl;
-  }
   return (index != -1);
 }
 
@@ -500,6 +554,10 @@ void RafDb::runTests()
   }
   string s = "WESTERN_REFINING";
   searchByToken(s, &fields);
+
+  s = "WALMART";
+  searchByToken(s, &fields);
+  printRecord(&fields);
 
   deleteRecord(s);
   searchByToken(s, &fields);

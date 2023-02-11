@@ -6,8 +6,8 @@ ABM_INDUSTRIES                        500NEW_YORK           NY10176110000
 ACTIVISION_BLIZZARD                   406SANTA_MONICA       CA904059500   
 ADOBE_SYSTEMS                         443MCLEAN             VA2210215706  
 ADP                                   240ROSELAND           NJ7068 57000  
-ADVANCE_AUTO_PARTS                    292ROANOKE            VA2401257500  
-AECOM                                 999LOS_ANGELES        CA9006787000  
+ADVANCE_AUTO_PARTS                    292CityTown           VA2401257500  
+AECOM                                 161LOS_ANGELES        CA9006787000  
 AES                                   194ARLINGTON          VA2220319000  
 AETNA                                 43 HARTFORD           CT6156 49500  
 AFLAC                                 126COLUMBUS           GA3199910212  
@@ -473,7 +473,7 @@ VOYA_FINANCIAL                        266NEW_YORK           NY101696700
 W.R._BERKLEY                          354GREENWICH          CT6830 7608   
 W.W._GRAINGER                         282LAKE_FOREST        IL6004525000  
 WALGREENS_BOOTS_ALLIANCE              17 DEERFIELD          IL60015300000 
-WALMART                               1  BENTONVILLE        AR727162300000
+WALMART                               _  BENTONVILLE        AR727162300000
 WASTE_MANAGEMENT                      201HOUSTON            TX7700241200  
 WEC_ENERGY_GROUP                      368MILWAUKEE          WI532038074   
 WELLCARE_HEALTH_PLANS                 195TAMPA              FL336347400   
@@ -481,7 +481,7 @@ WELLS_FARGO                           25 SAN_FRANCISCO      CA94163269100
 WESCO_INTERNATIONAL                   373PITTSBURGH         PA152199000   
 WESTERN_&_SOUTHERN_FINANCIAL_GROUP    483CINCINNATI         OH452022178   
 WESTERN_DIGITAL                       217IRVINE             CA9261272878  
-WESTERN_REFINING                      -1 -1                 -1-1   -1     
+WESTERN_REFINING                      349EL_PASO            TX799017134   
 WESTERN_UNION                         478ENGLEWOOD          CO8011210700  
 WESTROCK                              190NORCROSS           GA3007139000  
 WEYERHAEUSER                          341SEATTLE            WA9810410400  
@@ -497,4 +497,4 @@ XPO_LOGISTICS                         191GREENWICH          CT6831 87000
 YAHOO                                 498SUNNYVALE          CA940898500   
 YUM_BRANDS                            422LOUISVILLE         KY4021390000  
 YUM_CHINA_HOLDINGS                    399PLANO              TX75024420000 
-ZIMMER_BIOMET_HOLDINGS                352fjkdlajkdjfs_jkldsjIN4658018500  
+ZIMMER_BIOMET_HOLDINGS                352WARSAW             IN4658018500  

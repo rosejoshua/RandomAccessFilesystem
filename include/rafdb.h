@@ -22,12 +22,9 @@ private:
   void spaceToUnderscore(string &text);
   void underscoreToSpace(string &text);
   void updateEntryWidth();
-  void printHeader();
-  void printFooter();
   int getMinWidthField(const int index);
   bool findRecord(int *recordNum, vector<string> *fields);
   bool readRecord(const int recordNum, vector<string> *fields);
-  void printRecord(vector<string> *results);
   bool writeRecord(vector<string> *fields);
   int binarySearch(const string &targetName, vector<string> *fields);
 
@@ -37,6 +34,11 @@ public:
   RafDb();
   ~RafDb();
 
+  void printHeader();
+  void printIndexHeader();
+  void printFooter();
+  void printRecord(vector<string> *results);
+  void printRecordRange(const int low, const int high);
   bool createDB(const string inFilename);
   bool searchByToken(string &target, vector<string> *fields);
   void getDefaultFields(vector<string> *fields);
