@@ -1,7 +1,7 @@
 //-----------------------------------------------------
 // Example code to read from fixed length records (random access file)
 // Author:  Joshua Rose, modified version of code by Dr. Susan Gauch
-// Last updated:  Jan. 31, 2022
+// Last updated:  Feb 12, 2022
 //-----------------------------------------------------
 
 #include "rafdb.h"
@@ -520,14 +520,20 @@ int RafDb::binarySearch(const string &targetName, vector<string> *fields)
   int mid;
   bool failure = false;
   bool found = false;
+  string target = targetName;
+  //replacing spaces with underscores breaks String.compare() so need to undo here and per retreival
+  underscoreToSpace(target);
+  string currEntry = "";
   while (!found && (high >= low) && !failure)
   {
     mid = (low + high) / 2;
     if (readRecord(mid, fields))
     {
-      if (fields->at(0).compare(targetName) == 0)
+      currEntry = fields->at(0);
+      underscoreToSpace(currEntry);
+      if (currEntry.compare(target) == 0)
         found = true;
-      else if ((fields->at(0)).compare(targetName) < 0)
+      else if (currEntry.compare(target) < 0)
         low = mid + 1;
       else
         high = mid - 1;
@@ -550,8 +556,7 @@ int RafDb::binarySearch(const string &targetName, vector<string> *fields)
   }
 
   if (!found)
-    {      
-      cout << "Could not get record " << mid << endl;
+    {
       failure = true;
       return -1;
     }
