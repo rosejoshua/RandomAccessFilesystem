@@ -29,10 +29,6 @@ void menuOpt2(RafDb *db)
    {
       cout << "Succesfully opened " << dbName << ".data" << endl;
    }
-   else 
-   {
-      cerr << "Failure opening \'" << dbName << ".data\'\n\tHint: Has database been created yet?" << endl;
-   }
 }
 
 void menuOpt3(RafDb *db, vector<string> *fields)
