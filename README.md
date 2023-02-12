@@ -6,7 +6,6 @@ Project for Databases class
 
 run 'chmod u+x tests.sh'
 
-create empty dirs /bin and /objs
+create empty dirs /bin and /objs (if they dont exist)
 
 run './tests.sh'
-
