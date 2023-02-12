@@ -16,12 +16,14 @@ private:
   int numSortedRecords;
   int numOverflow;
   int recordSize;
+  string currDbName;
   fstream *p_dbFilePtr;
   vector< pair<string,int> > fieldsAndMaxLengths;
 
   void spaceToUnderscore(string &text);
   void underscoreToSpace(string &text);
   void updateEntryWidth();
+  void updateConfigFile();
   int getMinWidthField(const int index);
   bool findRecord(int *recordNum, vector<string> *fields);
   bool readRecord(const int recordNum, vector<string> *fields);
@@ -44,9 +46,9 @@ public:
   void getDefaultFields(vector<string> *fields);
   string getColumnName(int columnIndex);
   bool updateRecord(vector<string> *fields);
+  bool appendRecord(vector<string> *fields);
   bool deleteRecord(const string &name);
   bool open(const string &filename);
   bool isOpen();
   void close();
-  void runTests();
 };

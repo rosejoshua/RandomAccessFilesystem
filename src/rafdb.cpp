@@ -48,6 +48,42 @@ void RafDb::updateEntryWidth()
   recordSize += ON_MS_WINDOWS_OS ? 2 : 1;
 }
 
+// void RafDb::updateConfigFile()
+// {
+//   ofstream outFile;
+//   outFile.open(currDbName + ".config", std::ios_base::ate);
+//   if (!outFile)
+//   {
+//     cerr << "Error opening \'" << currDbName << ".config\'\n\tHint: does file exist?" << endl;
+//     return;
+//   }
+//   outFile.seekp(0);
+//   string temp = "";
+//   temp.append(to_string(numSortedRecords));
+//   temp.append(",");
+//   temp.append(to_string(numOverflow));
+//   outFile.write(temp.c_str(), temp.size());
+// }
+
+bool RafDb::appendRecord(vector<string> *fields)
+{
+  if (isOpen())
+  {
+    if (fields->size() == fieldsAndMaxLengths.size())
+    {
+      p_dbFilePtr->seekp((numSortedRecords + numOverflow)*recordSize);
+      writeRecord(fields);
+      cout << "Success writing new record with key: " << fields->at(0) << endl;
+      numOverflow++;
+    }
+    else
+      cerr << "Error: new record field count does not match database field count" << endl;
+    
+    return true;
+  }
+  return false;
+}
+
 bool RafDb::open(const string &filename)
 {
   ifstream dIn;
@@ -66,7 +102,7 @@ bool RafDb::open(const string &filename)
     cerr << "Error opening \'" << filename << ".config\'\n\tHint: does file exist?" << endl;
     return false;
   }
-
+  currDbName = filename;
   getline(dIn, tempString1, ','); // try to read first field of config file
   getline(dIn, tempString2);
   numSortedRecords = stoi(tempString1);
@@ -94,7 +130,6 @@ bool RafDb::open(const string &filename)
 
   // Open file in read/write mode
   p_dbFilePtr->open(filename + ".data", std::ios_base::in | std::ios_base::out | std::ios_base::ate);
-  //p_dbFilePtr->open(filename + ".data", fstream::in | fstream::out | fstream::app);
   if (p_dbFilePtr->is_open())
   {
     updateEntryWidth();
@@ -115,7 +150,18 @@ bool RafDb::isOpen()
 void RafDb::close()
 {
   if (p_dbFilePtr != nullptr && p_dbFilePtr->is_open())
+  {
     p_dbFilePtr->close();
+    p_dbFilePtr->open(currDbName + ".config", std::ios_base::in | std::ios_base::out | std::ios_base::ate);
+    p_dbFilePtr->seekp(0);
+    string temp = "";
+    temp.append(to_string(numSortedRecords));
+    temp.append(",");
+    temp.append(to_string(numOverflow));
+    *p_dbFilePtr << setw(temp.size()) << left << temp;
+    currDbName = "";
+    p_dbFilePtr->close();
+  }
 }
 
 void RafDb::spaceToUnderscore(string &text)
@@ -486,83 +532,29 @@ int RafDb::binarySearch(const string &targetName, vector<string> *fields)
       else
         high = mid - 1;
     }
-    else
+  }
+
+  if (!found && numSortedRecords > 0)
+  {
+    for (int i = 0; i < numOverflow; i++)
     {
-      cout << "Could not get record " << mid << endl;
-      failure = true;
+      if(readRecord(numSortedRecords+i, fields))
+      {
+        if (fields->at(0).compare(targetName) == 0)
+        {
+          found = true;
+          break;
+        }
+      }
     }
   }
 
-  if (found)
-    return mid; // the record number of the record
+  if (!found)
+    {      
+      cout << "Could not get record " << mid << endl;
+      failure = true;
+      return -1;
+    }
   else
-    return -1;
-}
-
-void RafDb::runTests()
-{
-  createDB("Fortune500");
-  open("Fortune500");
-  vector<string> fields;
-  getDefaultFields(&fields);
-  if (readRecord(0, &fields))
-  {
-    printHeader();
-    printRecord(&fields);
-  }
-
-  if (readRecord(9, &fields))
-  {
-    printRecord(&fields);
-  }
-  if (readRecord(5, &fields))
-  {
-    printRecord(&fields);
-  }
-  printFooter();
-  if (readRecord(-1, &fields))
-  {
-    printHeader();
-    printRecord(&fields);
-    printFooter();
-  }
-  if (readRecord(1000, &fields))
-  {
-    printHeader();
-    printRecord(&fields);
-    printFooter();
-  }
-
-  if (readRecord(9, &fields))
-  {
-    printRecord(&fields);
-  }
-  fields[1] = "999";
-  updateRecord(&fields);
-  if (readRecord(9, &fields))
-  {
-    printRecord(&fields);
-  }
-
-  if (readRecord(499, &fields))
-  {
-    printRecord(&fields);
-  }
-  fields[2] = "fjkdlajkdjfs jkldsjadkf  djklajfklsjkljfdklsa jkfdlsjaflkdsj";
-  updateRecord(&fields);
-  if (readRecord(499, &fields))
-  {
-    printRecord(&fields);
-  }
-  string s = "WESTERN_REFINING";
-  searchByToken(s, &fields);
-
-  s = "WALMART";
-  searchByToken(s, &fields);
-  printRecord(&fields);
-
-  deleteRecord(s);
-  searchByToken(s, &fields);
-
-  close();
+    return mid; // the record number of the record
 }

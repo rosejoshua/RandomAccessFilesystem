@@ -144,6 +144,30 @@ void menuOpt6(RafDb *db)
    db->printFirstNumRecords(10);
 }
 
+void menuOpt7(RafDb *db, vector<string> *fields)
+{
+   string tempString = "";
+   db->getDefaultFields(fields);
+   for (int i = 0; i < fields->size(); i++)
+   {
+      cout << "Enter data for field \"" << db->getColumnName(i) << "\": ";
+      getline(cin, tempString);
+      fields->at(i) = tempString;
+      cin.clear();
+      cout << endl;
+   }
+   cout << "ADD RECORD \"";
+   for (int i = 0; i < fields->size(); i++)
+   {
+      cout << fields->at(i);
+      if (i < fields->size()-1)
+         cout << ", ";
+      else 
+         cout << "\"" << endl;
+   }
+   db->appendRecord(fields);
+}
+
 void menuOpt8(RafDb *db)
 {
    string deleteTarget="";
@@ -223,7 +247,12 @@ void resolveMenuMethod(int choice, RafDb* p_db, vector<string>* p_fields)
          cerr << "No database is open yet!" << endl;
       break;
    case 7:
-      cout << "chose 7" << endl;
+      if (p_db->isOpen())
+      {
+         menuOpt7(p_db, p_fields);
+      }
+      else 
+         cerr << "No database open to add record to!" << endl;
       break;
    case 8:
       //call method
@@ -234,6 +263,8 @@ void resolveMenuMethod(int choice, RafDb* p_db, vector<string>* p_fields)
       else 
          cerr << "No database is open yet!" << endl;
       break;
+   case 9:
+      p_db->close();
    default:
       break;
    }
@@ -264,7 +295,6 @@ int main()
       catch (const std::exception& e) 
       {
          currentChoice = 0;
-         //cout << "Invalid input, please try again..." << endl;
       }
       if (currentChoice < 0 || currentChoice > 9)
          cout << "Invalid input, please try again..." << endl;
