@@ -1,8 +1,12 @@
 # RandomAccessFilesystem
-Project for algorithms class\n
-[requires g++ from command line, tested on MacOS]\n
-\n
-run 'chmod u+x tests.sh'\n
-create empty dirs /bin and /objs\n
+
+Project for algorithms class
+
+[requires g++ from command line, tested on MacOS]
+
+run 'chmod u+x tests.sh'
+
+create empty dirs /bin and /objs
+
 run './tests.sh'
 
