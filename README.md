@@ -1,6 +1,6 @@
 # RandomAccessFilesystem
 
-Project for algorithms class
+Project for Databases class
 
 [requires g++ from command line, tested on MacOS]
 
