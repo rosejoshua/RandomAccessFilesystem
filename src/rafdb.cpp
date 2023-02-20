@@ -7,6 +7,8 @@
 #include "rafdb.h"
 #include <algorithm>
 
+using namespace std;
+
 RafDb::RafDb()
 {
   numSortedRecords = 0;
