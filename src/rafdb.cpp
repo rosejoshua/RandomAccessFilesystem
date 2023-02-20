@@ -5,6 +5,7 @@
 //-----------------------------------------------------
 
 #include "rafdb.h"
+#include <algorithm>
 
 RafDb::RafDb()
 {
@@ -47,23 +48,6 @@ void RafDb::updateEntryWidth()
   }
   recordSize += ON_MS_WINDOWS_OS ? 2 : 1;
 }
-
-// void RafDb::updateConfigFile()
-// {
-//   ofstream outFile;
-//   outFile.open(currDbName + ".config", std::ios_base::ate);
-//   if (!outFile)
-//   {
-//     cerr << "Error opening \'" << currDbName << ".config\'\n\tHint: does file exist?" << endl;
-//     return;
-//   }
-//   outFile.seekp(0);
-//   string temp = "";
-//   temp.append(to_string(numSortedRecords));
-//   temp.append(",");
-//   temp.append(to_string(numOverflow));
-//   outFile.write(temp.c_str(), temp.size());
-// }
 
 bool RafDb::appendRecord(vector<string> *fields)
 {
